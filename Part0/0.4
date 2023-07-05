@@ -1,0 +1,14 @@
+title 0.4: nueva nota
+
+Browser->Server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
+Server-->Browser: 302 https://studies.cs.helsinki.fi/exampleapp/notes
+Browser->Server: GET https://studies.cs.helsinki.fi/exampleapp/notes
+Server-->Browser: 200 text/html; charset=utf-8 HTML Code
+Browser->Server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+Server-->Browser: 200 text/css; charset=UTF-8 CSS Code
+Browser->Server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+Server-->Browser: 200 application/javascript; charset=UTF-8 Javacript code
+Browser-->Server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+Server-->Browser: 200 application/json; charset=utf-8 JSON Data
+Browser->Googleapis: GET https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400;500;600;700;800;900&display=swa
+Googleapis-->Browser: 200 text/css; charset=utf-8 CSS code
