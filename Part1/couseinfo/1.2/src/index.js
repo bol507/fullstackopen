@@ -1,0 +1,63 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+const Header = (props) => {
+  return (
+    <div>
+      <h1>{props.course}</h1>
+    </div>
+  )
+}
+const Part = (props) => {
+  return (
+    <div>
+      <p>
+        {props.part} {props.exercise}
+      </p>
+    </div>
+  )
+}
+const Content = (props) => {
+  return (
+    <div>
+      <Part part={props.parts[0].name} exercise={props.parts[0].exercises} />
+      <Part part={props.parts[1].name} exercise={props.parts[1].exercises} />
+      <Part part={props.parts[2].name} exercise={props.parts[2].exercises} />
+    </div>
+  )
+}
+const Total = (props) => {
+  return (
+    <p> Number of excercises {props.parts[0].exercises + props.parts[1].exercises + props.parts[2].exercises} </p>
+  )
+}
+
+const App = () => {
+  const course = 'Half Stack application development'
+  const parts = [
+    {
+      name: 'Fundamentals of React',
+      exercises: 10
+    },
+    {
+      name: 'Using props to pass data',
+      exercises: 7
+    },
+    {
+      name: 'State of a component',
+      exercises: 14
+    }
+  ];
+
+  return (
+    <div>
+      <Header course={course}/>
+      <Content parts={parts} />
+      <Total parts={parts} />
+    </div>
+  )
+}
+//new method in react18
+const container = document.getElementById('root');
+const root = createRoot(container); 
+root.render(<App />);
