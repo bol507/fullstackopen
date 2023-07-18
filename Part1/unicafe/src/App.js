@@ -13,7 +13,10 @@ const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
-  //create function to count feedback separately 
+  // excercise 1.7 
+  const total = good + neutral + bad 
+  const average = ((1 * good + 0 * neutral - 1 * bad) / total).toFixed(2)
+  const positive = ((good / (total)) * 100).toFixed(2) 
   
 
   return (
@@ -27,6 +30,9 @@ const App = () => {
       <p>Good: {good}</p>
       <p>Neutral: {neutral}</p>
       <p>Bad: {bad}</p>
+      <p>All: {total}</p>
+      <p>Average: {average > 0 ? average : 0 }</p>
+      <p>Positive: {positive > 0 ? positive + "%" : 0}</p>
     </div>
   )
 }
