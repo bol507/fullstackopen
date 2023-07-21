@@ -13,6 +13,10 @@ const Statistics = ({ good, neutral, bad }) => {
   const total = good + neutral + bad 
   const average = ((1 * good + 0 * neutral - 1 * bad) / total).toFixed(2)
   const positive = ((good / (total)) * 100).toFixed(2) 
+  //excercise 1.9
+  if (total === 0) {
+    return <p>No feedback given</p>
+  }
 
   return (
     <div>
@@ -23,8 +27,8 @@ const Statistics = ({ good, neutral, bad }) => {
       <p>Average: {average > 0 ? average : 0}</p>
       <p>Positive: {positive > 0 ? positive + "%" : 0}</p>
     </div>
-  );
-};
+  )
+}
 
 const App = () => {
   const [good, setGood] = useState(0)
