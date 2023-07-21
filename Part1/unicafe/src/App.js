@@ -20,16 +20,21 @@ const Statistics = ({ good, neutral, bad }) => {
 
   return (
     <div>
-      <p>Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
-      <p>All: {total}</p>
-      <p>Average: {average > 0 ? average : 0}</p>
-      <p>Positive: {positive > 0 ? positive + "%" : 0}</p>
+      <StatisticLine text="Good" value={good} />
+      <StatisticLine text="Neutral" value={neutral} />
+      <StatisticLine text="Bad" value={bad} />
+      <StatisticLine text="All" value={total} />
+      <StatisticLine text="Average" value={average > 0 ? average : 0} />
+      <StatisticLine text="Positive" value={positive > 0 ? positive + "%" : 0} />
     </div>
   )
 }
-
+//excercise 1.10
+const StatisticLine = ({ text, value }) => {
+  return (
+    <p>{text}: {value}</p>
+  )
+}
 const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
