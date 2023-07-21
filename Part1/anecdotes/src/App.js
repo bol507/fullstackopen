@@ -11,18 +11,31 @@ const App = (props) => {
   }
 
   const handleVote = () => {
-    // create a copy object
-    const newVotes = { ...votes }
+    // create a copy 
+    const newVotes = [...votes]
     newVotes[selected] += 1
     setVotes(newVotes)
   }
+  
+  const maxVotes = votes.indexOf(Math.max(...votes))
 
   return (
     <div>
+      <h2>Anecdote of the day</h2>
       {props.anecdotes[selected]}
       <p>Votes: {votes[selected]}</p>
       <button onClick={handleVote}>Upvote</button>
       <button onClick={handleRandom}>Next Anecdote</button>
+      <br/>
+      <h2>Anecdote with the most votes</h2>
+      {votes[maxVotes] > 0 ? (
+        <div>
+          <p>{props.anecdotes[maxVotes]}</p>
+          <p>Votes: {votes[maxVotes]}</p>
+        </div>
+      ) : (
+        <p>No votes</p>
+      )}
     </div>
   )
 }
