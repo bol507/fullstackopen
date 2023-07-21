@@ -3,16 +3,25 @@ import { useState } from 'react';
 
 const App = (props) => {
   const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState(new Array(props.anecdotes.length).fill(0))//excercise 1.13
 
   const handleRandom = () => {
-    const result = Math.floor(Math.random() * props.anecdotes.length);
-    setSelected(result);
+    const result = Math.floor(Math.random() * props.anecdotes.length)
+    setSelected(result)
+  }
+
+  const handleVote = () => {
+    // create a copy object
+    const newVotes = { ...votes }
+    newVotes[selected] += 1
+    setVotes(newVotes)
   }
 
   return (
     <div>
       {props.anecdotes[selected]}
-      <br/>
+      <p>Votes: {votes[selected]}</p>
+      <button onClick={handleVote}>Upvote</button>
       <button onClick={handleRandom}>Next Anecdote</button>
     </div>
   )
