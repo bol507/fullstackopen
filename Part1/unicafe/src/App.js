@@ -7,7 +7,7 @@ const Button = (props) => {
     <button onClick={props.handleClick}>{props.text}</button>
   )
 }
-// excercise 1.8
+// excercise 1.11
 const Statistics = ({ good, neutral, bad }) => {
   // excercise 1.7 
   const total = good + neutral + bad 
@@ -19,20 +19,25 @@ const Statistics = ({ good, neutral, bad }) => {
   }
 
   return (
-    <div>
-      <StatisticLine text="Good" value={good} />
-      <StatisticLine text="Neutral" value={neutral} />
-      <StatisticLine text="Bad" value={bad} />
-      <StatisticLine text="All" value={total} />
-      <StatisticLine text="Average" value={average > 0 ? average : 0} />
-      <StatisticLine text="Positive" value={positive > 0 ? positive + "%" : 0} />
-    </div>
+    <table>
+      <tbody>
+        <StatisticLine text="Good" value={good} />
+        <StatisticLine text="Neutral" value={neutral} />
+        <StatisticLine text="Bad" value={bad} />
+        <StatisticLine text="All" value={total} />
+        <StatisticLine text="Average" value={average > 0 ? average : 0} />
+        <StatisticLine text="Positive" value={positive > 0 ? positive + "%" : 0} />
+      </tbody>
+    </table>
   )
 }
-//excercise 1.10
+//excercise 1.11
 const StatisticLine = ({ text, value }) => {
   return (
-    <p>{text}: {value}</p>
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+  </tr>
   )
 }
 const App = () => {
