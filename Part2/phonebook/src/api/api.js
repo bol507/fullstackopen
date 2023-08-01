@@ -2,7 +2,8 @@ import axios from 'axios';
 
 //default config
 const axiosParams = {
-    baseURL: 'http://localhost:3001' //json-server
+    //baseURL: 'http://localhost:3001' //json-server
+    baseURL: 'https://bol507-fullstack.onrender.com'
 }
 
 //create axios instance with default params

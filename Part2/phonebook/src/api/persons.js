@@ -1,7 +1,7 @@
 import api from './api'
 
 const URLS =  {
-    Persons: 'persons'
+    Persons: 'api/persons'
     
 }
 const faceScreaming = String.fromCodePoint(0x1F631)
