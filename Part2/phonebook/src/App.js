@@ -29,7 +29,6 @@ const App = () => {
   const handleAdd = (event) => {
     event.preventDefault()
     const personExists = persons.find((person) => person.name.toLowerCase() === newName.toLowerCase())
-    console.log(personExists)
     if(personExists){
       const confirm = window.confirm(`${newName} is already in the phonebook, do you want update the phone number?`)
       if (confirm){

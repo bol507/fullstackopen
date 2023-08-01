@@ -45,9 +45,6 @@ morgan.token('fullstack',function (tokens, req, res) {
 
 app.use(morgan('fullstack'))
 
-app.get('/', (req, res) => {
-  res.send('<h1>Welcome to part3</h1>')
-})
 
 app.get('/api/persons',(req,res) => {
     res.json(persons)
@@ -100,6 +97,8 @@ app.post('/api/persons', (req, res) => {
 
   res.json(newPerson)
 })
+
+app.use(express.static('build'))
 
 const PORT = 3001
 app.listen(PORT, () => {

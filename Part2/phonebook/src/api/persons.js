@@ -1,9 +1,9 @@
 import api from './api'
 
-const URLS =  {
+/*const URLS =  {
     Persons: 'api/persons'
     
-}
+}*/
 const faceScreaming = String.fromCodePoint(0x1F631)
 const style1 = [
     'color:red', 
@@ -16,15 +16,15 @@ const style2 = [
 ].join(';')
 
 export const fetchPersons = () => {
-    return api.get(URLS.Persons).then((response) => {return response.data})
+    return api.get('/').then((response) => {return response.data})
 }
 
 export const deletePerson = (id) => {
-    return api.delete(`${URLS.Persons}/${id}`)
+    return api.delete(`/${id}`)
 }
 
 export const createPerson = (person) =>{
-    return api.post(URLS.Persons,person).then((response) => {return response.data})
+    return api.post('/',person).then((response) => {return response.data})
     .catch((error) => {
         console.log(`%cError: ${faceScreaming} %c${error}` ,style1,style2)
         throw new Error('Error creating person');
@@ -33,7 +33,7 @@ export const createPerson = (person) =>{
 }
 
 export const updatePerson = (id,personObject) => {
-    return api.put(`${URLS.Persons}/${id}`,personObject).then((response) => {return response.data})
+    return api.put(`/${id}`,personObject).then((response) => {return response.data})
     .catch((error) => {
         console.log(`%cError: ${faceScreaming} %c${error}` ,style1,style2)
         throw new Error(`${personObject.name} has already been remove from server`);
