@@ -32,8 +32,8 @@ export const createPerson = (person) =>{
    
 }
 
-export const updatePerson = (id,personObject) => {
-    return api.put(`/${id}`,personObject).then((response) => {return response.data})
+export const updatePerson = (personObject) => {
+    return api.put(`/${personObject.id}`,personObject).then((response) => {return response.data})
     .catch((error) => {
         console.log(`%cError: ${faceScreaming} %c${error}` ,style1,style2)
         throw new Error(`${personObject.name} has already been remove from server`);

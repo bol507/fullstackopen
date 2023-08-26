@@ -33,7 +33,7 @@ const App = () => {
       const confirm = window.confirm(`${newName} is already in the phonebook, do you want update the phone number?`)
       if (confirm){
         const personUpdate =  {...personExists, number: newPhone}
-        updatePerson(personExists.id,personUpdate)
+        updatePerson(personUpdate)
           .then((returnedPerson)=>{
             setMessage('The operation was successful')
             setType('info')
