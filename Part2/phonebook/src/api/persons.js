@@ -27,7 +27,7 @@ export const createPerson = (person) =>{
     return api.post('/',person).then((response) => {return response.data})
     .catch((error) => {
         console.log(`%cError: ${faceScreaming} %c${error}` ,style1,style2)
-        throw new Error('Error creating person');
+        throw new Error(error.response.data.error);
     })
    
 }
@@ -36,7 +36,7 @@ export const updatePerson = (personObject) => {
     return api.put(`/${personObject.id}`,personObject).then((response) => {return response.data})
     .catch((error) => {
         console.log(`%cError: ${faceScreaming} %c${error}` ,style1,style2)
-        throw new Error(`${personObject.name} has already been remove from server`);
+        throw new Error(error.response.data.error);
     })
    
 }

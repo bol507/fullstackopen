@@ -76,12 +76,14 @@ const App = () => {
   
         })
         .catch((error)=>{
+          
           setMessage(error.message)
           setType('error')
 
           setTimeout(() => {
             setMessage(null)
           }, 2000)
+          
         })
       
       clear()

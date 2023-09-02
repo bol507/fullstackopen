@@ -2,8 +2,8 @@ import axios from 'axios';
 
 //default config
 const axiosParams = {
-    //baseURL: 'http://localhost:3001' //json-server
-    baseURL: 'api/persons'
+    baseURL: 'http://localhost:3001/api/persons' //local-server
+    //baseURL: 'api/persons'
 }
 
 //create axios instance with default params

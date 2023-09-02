@@ -11,8 +11,8 @@ app.use(express.json())
 const Person = require('./models/person')
 
 
-morgan.token('fullstack',function (tokens, req, res) {
-  let body = req.method === 'POST' ? JSON.stringify(req.body) : ' ';
+morgan.token('fullstack', function (tokens, req, res) {
+  let body = req.method === 'POST' ? JSON.stringify(req.body) : ' '
   return [
     tokens.method(req, res),
     tokens.url(req, res),
@@ -26,10 +26,10 @@ morgan.token('fullstack',function (tokens, req, res) {
 app.use(morgan('fullstack'))
 
 
-app.get('/api/persons',(req,res) => {
-    Person.find({}).then((persons) => {
-      res.json(persons)
-    })
+app.get('/api/persons', (req, res) => {
+  Person.find({}).then((persons) => {
+    res.json(persons)
+  })
 })
 
 app.get('/info', (req, res) => {
@@ -42,36 +42,36 @@ app.get('/info', (req, res) => {
 })
 
 // Route to retrieve information about a person by their ID
-app.get('/api/persons/:id', (req, res,next) => {
-   // Find a person in the database based on the provided ID
+app.get('/api/persons/:id', (req, res, next) => {
+  // Find a person in the database based on the provided ID
   Person.findById(req.params.id)
-  .then(person => {
-    // If a person is found
-    if (person) {
-      // Send the person object as a JSON response
-      res.json(person)
-    } else {
-      // If no person is found, set the response status to 404 (Not Found)
-      res.status(404).end()
-    }
-  })
-  .catch(error => next(error))
+    .then(person => {
+      // If a person is found
+      if (person) {
+        // Send the person object as a JSON response
+        res.json(person)
+      } else {
+        // If no person is found, set the response status to 404 (Not Found)
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 // Route to delete a person by their ID
-app.delete('/api/persons/:id', (req, res,next) => {
-   // Find a person in the database based on the provided ID and remove it
+app.delete('/api/persons/:id', (req, res, next) => {
+  // Find a person in the database based on the provided ID and remove it
   Person.findByIdAndRemove(req.params.id)
     .then(deletedPerson => {
       // If a person is found and removed
-      if (deletedPerson){
-        console.log('deleted',deletedPerson.name)
-         // Send the removed person object as a JSON response
+      if (deletedPerson) {
+        console.log('deleted', deletedPerson.name)
+        // Send the removed person object as a JSON response
         res.json(deletedPerson)
-      }else{
-        console.log('Cannot find the person with id',req.params.id)
+      } else {
+        console.log('Cannot find the person with id', req.params.id)
         // If no person is found, set the response status to 404 (Not Found)
-        response.status(404).end()
+        res.status(404).end()
       }
     })
     .catch(error => next(error))
@@ -85,16 +85,16 @@ app.put('/api/persons/:id', (req, res, next) => {
     number: body.number,
   }
 
-  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+  Person.findByIdAndUpdate(req.params.id, person, { new: true, runValidators: true })
     .then(updatedPerson => {
-      if(updatedPerson){
+      if (updatedPerson) {
         console.log('person updated!')
         res.json(updatedPerson)
-      }else {
+      } else {
         console.log(updatedPerson)
         res.status(404).end()
       }
-      
+
     })
     .catch(error => next(error))
 })
@@ -107,7 +107,7 @@ app.post('/api/persons', (req, res, next) => {
     return res.status(400).json({ error: 'name or number missing' })
   }
 
-  const newPerson = new Person( {
+  const newPerson = new Person({
     name: body.name,
     number: body.number,
     //id: Math.floor(Math.random() * 999999)
@@ -115,17 +115,23 @@ app.post('/api/persons', (req, res, next) => {
 
   Person.findOne({ name: body.name })
     .then(existingPerson => {
-      if(!existingPerson){
-        newPerson.save().then(savedPerson => { res.json(savedPerson)})
-        .catch(error =>{
-          console.log('oh no!',error)
-          next(error)
-        })
-      }else{
+      if (!existingPerson) {
+        newPerson.save().then(savedPerson => { res.json(savedPerson) })
+          .catch(error => {
+            console.log('oh no!', error)
+            next(error)
+          })
+      } else {
         console.log('Person already exists')
         console.log('Found:', existingPerson)
         res.statusMessage = 'Person already exists'
-        res.status(400).end()
+        res.status(409).end()
+      }
+    }).catch(error => {
+      if (error.name === 'ValidationError') {
+        res.status(400).json({ error: error.message })
+      } else {
+        next(error)
       }
     })
 
@@ -133,11 +139,13 @@ app.post('/api/persons', (req, res, next) => {
 
 
 const errorHandler = (error, request, response, next) => {
-  
+
   console.error(error.message)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)
