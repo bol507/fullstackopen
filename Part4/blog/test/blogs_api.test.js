@@ -141,6 +141,27 @@ describe('Create new blog post', () => {
 		expect(responseBody.error).toBe('Title and URL are required')
 	}, 2000)
 
+	test('should add a new blog without token', async () => {
+		// Simulate the middleware userExtractor
+		const user = { _id: '64fc7813f76d9221a87d3802'}
+		const newBlog = {
+			title: 'Microservices Architecture',
+			author: 'Amburi Roy',
+			url: 'https://dev.to/amburi/microservices-architecture-3b98',
+			likes: 2,
+			user: user._id,
+		}
+
+		await api
+			.post('/api/blogs')
+			
+			.send(newBlog)
+			.expect(401)
+			.expect('Content-Type', /application\/json/)
+
+		
+	}, 2000)
+
 })
 
 describe('Delete a blog', () => {
