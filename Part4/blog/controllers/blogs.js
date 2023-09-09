@@ -1,9 +1,20 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 
+
+/*const getTokenFrom = request => {
+	const authorization = request.get('authorization')
+	if (authorization && authorization.startsWith('Bearer ')) {
+		return authorization.replace('Bearer ', '')
+	}
+	return null
+}
+*/
+
 blogsRouter.get('/', async (request, response) => {
 	try {
-		const blogs = await Blog.find({})
+		const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
+		console.log(blogs)
 		if (blogs.length === 0) {
 			response.json('Empty')
 		} else {
@@ -18,24 +29,32 @@ blogsRouter.post('/', async (request, response) => {
 	try {
 		const { title, author, url, likes } = request.body
 
+		
 		if (!title || !url) {
 			return response.status(400).json({ error: 'Title and URL are required' })
 		}
+
+		const user = request.user
 
 		const blog = new Blog({
 			title,
 			author,
 			url,
 			likes: likes || 0,
+			user: user._id,
 		})
 
-		const result = await blog.save()
+		const savedBlog = await blog.save()
+		user.blogs = user.blogs.concat(savedBlog._id)
+		await user.save()
+
 		response.status(201).json({
-			_id: result._id,
-			title: result.title,
-			author: result.author,
-			url: result.url,
-			likes: result.likes,
+			_id: savedBlog._id,
+			title: savedBlog.title,
+			author: savedBlog.author,
+			url: savedBlog.url,
+			likes: savedBlog.likes,
+			user: user._id
 		})
 	} catch (error) {
 		response.status(500).json({ error: error.message })
@@ -44,10 +63,21 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
 	try {
-		const blog = await Blog.findByIdAndRemove(request.params.id)
+		const blogId = request.params.id
+		
+
+		const blog = await Blog.findById(blogId)
 		if (!blog) {
-			return response.status(404).json({ error: 'Blog not found' });
+			return response.status(404).json({ error: 'Blog not found' })
 		}
+		
+		const user = request.user
+
+		if (blog.user.toString() !== user._id.toString()) {
+			return response.status(403).json({ error: 'Forbidden' })
+		}
+
+		await Blog.findByIdAndRemove(blogId)
 		response.status(204).end()
 	} catch (error) {
 		next(error)
@@ -87,7 +117,7 @@ blogsRouter.put('/:id', async (request, response, next) => {
 	}
 })
 
-blogsRouter.put('/:id/likes', async (request, response,next) => {
+blogsRouter.put('/:id/likes', async (request, response, next) => {
 	try {
 		const { likes } = request.body
 

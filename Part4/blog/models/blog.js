@@ -1,25 +1,22 @@
 const mongoose = require('mongoose')
-const config = require('../utils/config')
-const logger = require('../utils/logger')
-
-const mongoUrl = config.MONGODB_URI
-mongoose.connect(mongoUrl)
-	.then(() => {
-		logger.info('connected to MongoDB')
-	})
-	.catch((error) => {
-		logger.error('Error: ', error)
-	})
 
 const blogSchema = new mongoose.Schema({
 	title: {
-		type: String},
+		type: String
+	},
 	author: {
-		type: String},
+		type: String
+	},
 	url: {
-		type: String},
+		type: String
+	},
 	likes: {
-		type: Number},
+		type: Number
+	},
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
+	}
 })
 
 blogSchema.set('toJSON', {
