@@ -17,7 +17,7 @@ router.post('/', userExtractor, async (request, response) => {
     title, author, url, 
     likes: likes ? likes : 0
   })
-
+  console.log(blog)
   const user = request.user
 
   if (!user) {

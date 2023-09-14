@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 
 import './style.css'
 
-import Blog from './components/Blog'
+
 import LoginForm from './components/LoginForm'
 import Navbar from './components/Navbar'
+import CreateBlog from './components/CreateBlog'
+import Home from './components/Home'
 
 import loginService from './services/login'
 import blogService from './services/blogs'
@@ -13,6 +15,7 @@ import blogService from './services/blogs'
 import Notification from './components/Notification'
 
 const App = () => {
+  const [currentSection, setCurrentSection] = useState(null)
   const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState([])
   const [message, setMessage] = useState('')
@@ -49,7 +52,6 @@ const App = () => {
     } catch (error) {
       setMessage(error.message)
       setType('error')
-      console.log(error)
       setTimeout(() => {
         setMessage(null)
       }, 10000)
@@ -62,17 +64,25 @@ const App = () => {
     blogService.setToken(null);
   }
 
-  const addBlog = async (title,author,url,event) => {
-    event.preventDefault()
+  const handleSectionCreateBlog = () => {
+    setCurrentSection('create-blog');
+  }
+
+  const handleSectionHome = () => {
+    setCurrentSection(null);
+  }
+
+
+  const handleCreateBlog = async (title, author, url) => {
+
     try {
-      const payload = {
-        user: user,
+      const blogObjet = {
         title,
         author,
         url
       }
       blogService.setToken(user.token)
-      const createdBlog = blogService.create(payload)
+      const createdBlog = await blogService.create(blogObjet)
       setBlogs([...blogs, createdBlog])
       setTitle('');
       setAuthor('');
@@ -99,15 +109,24 @@ const App = () => {
       </div>
 
     )
+  }
 
+  let content = <div></div>;
+  if (currentSection === null) {
+    content = <Home blogs={blogs} />
+  } else if (currentSection === 'create-blog') {
+    content = <CreateBlog handleCreateBlog={handleCreateBlog} />;
   }
 
   return (
     <div>
-      <Navbar handleLogout={handleLogout} />
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+      <Navbar
+        handleLogout={handleLogout}
+        handleSectionCreateBlog={handleSectionCreateBlog}
+        handleSectionHome={handleSectionHome}
+      />
+      <Notification message={message} type={type} />
+      {content}
     </div>
 
 
