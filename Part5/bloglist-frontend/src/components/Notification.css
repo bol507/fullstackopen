@@ -1,0 +1,32 @@
+.text-sm{
+    font-size: .875rem;
+    line-height: 1.25rem;
+}
+.font-bold{
+    font-weight: 500
+}
+.alert {
+    border-radius: 0.5rem;
+    padding:1rem;
+    margin-bottom: 1rem;
+}
+.info {
+    color:  rgba(30,66,159,1);
+    background:  rgba(235,245,255,1);
+}
+
+.success {
+    color:  rgba(3, 84, 63, 1);
+    background:  rgba(243, 250, 247, 1);
+}
+
+
+.error {
+    color:  rgb(155, 28,28);
+    background:  rgba(253, 242, 242, 1);
+}
+
+.warning {
+    color:  rgb(114, 59, 19);
+    background:  rgba(253, 253, 234, 1);
+}
