@@ -33,4 +33,26 @@ const create = async newObject => {
   }
 }
 
-export default { getAll, setToken, create }
+const update = async (newObject) => {
+  try{
+    const config = { headers: { 'Authorization': token } }
+    const response = await api.put(`/blogs/${newObject.id}`, newObject, config)
+    return response.data
+  }catch{
+    console.log(`%cError: ${ws.faceScreaming} %c${error}`, ws.style1, ws.style2)
+    throw new Error(error.response.data.error);
+  }
+}
+
+const remove = async (id) => {
+  try{
+    const config = { headers: { 'Authorization': token } }
+    const response = await api.delete(`/blogs/${id}`, config)
+    return response.data
+  }catch{
+    console.log(`%cError: ${ws.faceScreaming} %c${error}`, ws.style1, ws.style2)
+    throw new Error(error.response.data.error);
+  }
+}
+
+export default { getAll, setToken, create, update, remove }

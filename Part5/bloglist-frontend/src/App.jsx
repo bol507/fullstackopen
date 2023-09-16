@@ -1,33 +1,37 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import './style.css'
 
 
 import LoginForm from './components/LoginForm'
 import Navbar from './components/Navbar'
-import CreateBlog from './components/CreateBlog'
-import Home from './components/Home'
+import BlogForm from './components/BlogForm'
+import Blog from './components/Blog'
+import Togglable from './components/Togglable'
 
 import loginService from './services/login'
 import blogService from './services/blogs'
 
-
 import Notification from './components/Notification'
 
 const App = () => {
-  const [currentSection, setCurrentSection] = useState(null)
   const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState([])
   const [message, setMessage] = useState('')
   const [type, setType] = useState('')
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
+  const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    blogService.getAll()
+      .then((blogs) => {
+        const sortedBlogs = blogs.sort(compareByLikes)
+        setBlogs(sortedBlogs)
+      })
   }, [])
 
+  /**
+   * save user and token in local storage
+   */
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -36,6 +40,10 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const compareByLikes = (a, b) => {
+    return b.likes - a.likes;
+  }
 
   const handleLogin = async (username, password) => {
     try {
@@ -58,6 +66,7 @@ const App = () => {
     }
   }
 
+  
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser');
     setUser(null);
@@ -73,20 +82,12 @@ const App = () => {
   }
 
 
-  const handleCreateBlog = async (title, author, url) => {
-
+  const handleCreateBlog = async (blogObjet) => {
     try {
-      const blogObjet = {
-        title,
-        author,
-        url
-      }
+      blogFormRef.current.toggleVisibility()
       blogService.setToken(user.token)
       const createdBlog = await blogService.create(blogObjet)
       setBlogs([...blogs, createdBlog])
-      setTitle('');
-      setAuthor('');
-      setUrl('');
       setMessage('Blog created')
       setType('success')
       setTimeout(() => {
@@ -101,6 +102,49 @@ const App = () => {
     }
   }
 
+  const handleUpdateBlog = async (blogObject) => {
+    try {
+      blogService.setToken(user.token)
+      await blogService.update(blogObject)
+      setBlogs((prevBlogs) => {
+        const updatedBlogs = prevBlogs.map((blog) =>
+          blog.id === blogObject.id ? blogObject : blog
+        );
+        return updatedBlogs;
+      });
+      setMessage('Blog updated')
+      setType('success')
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000);
+    } catch (error) {
+      setMessage(error.message)
+      setType('error')
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
+    }
+  }
+
+  const handleDeleteBlog = async(blogId) => {
+    try {
+      blogService.setToken(user.token)
+      await blogService.remove(blogId);
+      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== blogId));
+      setMessage('Blog deleted');
+      setType('success');
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    } catch (error) {
+      setMessage(error.message);
+      setType('error');
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -111,13 +155,6 @@ const App = () => {
     )
   }
 
-  let content = <div></div>;
-  if (currentSection === null) {
-    content = <Home blogs={blogs} />
-  } else if (currentSection === 'create-blog') {
-    content = <CreateBlog handleCreateBlog={handleCreateBlog} />;
-  }
-
   return (
     <div>
       <Navbar
@@ -126,7 +163,21 @@ const App = () => {
         handleSectionHome={handleSectionHome}
       />
       <Notification message={message} type={type} />
-      {content}
+
+      <Togglable buttonLabel="New Blog" ref={blogFormRef}>
+        <BlogForm CreateBlog={handleCreateBlog} />
+      </Togglable>
+      {
+        blogs.map(blog =>
+          <Blog
+            key={blog.id}
+            blog={blog}
+            UpdateBlog={handleUpdateBlog}
+            handleDeleteBlog={handleDeleteBlog}
+          />
+        )
+      }
+
     </div>
 
 
