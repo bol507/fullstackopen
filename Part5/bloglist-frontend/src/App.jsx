@@ -174,6 +174,7 @@ const App = () => {
             blog={blog}
             UpdateBlog={handleUpdateBlog}
             handleDeleteBlog={handleDeleteBlog}
+            user={user}
           />
         )
       }

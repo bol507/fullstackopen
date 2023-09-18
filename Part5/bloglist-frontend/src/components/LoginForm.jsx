@@ -22,11 +22,13 @@ const LoginForm = ({ handleLogin }) => {
 					<InputGroup
 						label="Username"
 						value={usernameValue}
+						id="username"
 						onChange={(event) => setUsernameValue(event.target.value)}
 					/>
 					<InputGroup
 						label="Password"
 						type="password"
+						id="password"
 						value={passwordValue}
 						onChange={(event) => setPasswordValue(event.target.value)}
 					/>
