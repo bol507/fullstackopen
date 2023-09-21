@@ -20,22 +20,40 @@ const asObject = (anecdote) => {
 const initialState = anecdotesAtStart.map(asObject)
 
 
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'VOTE_ANECDOTE':
       const id = action.payload.id;
-      const updatedState = state.map(anecdote => {
+      const updatedAnecdotes = state.map(anecdote => {
         if (anecdote.id === id) {
           return {
             ...anecdote,
             votes: anecdote.votes + 1
           };
         }
-        return anecdote
+        return anecdote;
       });
-      return updatedState
+      return updatedAnecdotes
+
     case 'ADD_ANECDOTE':
-      return [...state, action.payload]
+      const newAnecdote = {
+        content: action.payload.content,
+        id: getId(),
+        votes: 0
+      };
+      return [...state, newAnecdote]
+    case 'SET_FILTER':
+      console.log(action.filter)
+      if (action.filter === ""){
+        
+        return initialState
+      }
+      const filteredAnecdotes = state.filter(anecdote =>
+        anecdote.content.toLowerCase().includes(action.filter.toLowerCase())
+      )
+      return filteredAnecdotes
+     
     default:
       return state
   }
