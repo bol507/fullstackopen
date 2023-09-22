@@ -5,8 +5,12 @@ import Notification from './components/Notification'
 
 import { getAnecdotes, updateAnecdote } from './requests'
 
+import { useNotificationDispatch } from './NotificationContext'
+
 const App = () => {
   const queryClient = useQueryClient()
+  const notificationDispatch = useNotificationDispatch()
+
   const updateAnecdoteMutation = useMutation(updateAnecdote,{
     onSuccess: () => {
       queryClient.invalidateQueries('anecdotes')
@@ -15,7 +19,7 @@ const App = () => {
   
   const handleVote = (anecdote) => {
     updateAnecdoteMutation.mutate({ ...anecdote, votes: anecdote.votes + 1  })
-    //console.log('vote')
+    notificationDispatch({ type: 'SET_MESSAGE', message: 'Voted successfully!' })
   }
 
   const result = useQuery({

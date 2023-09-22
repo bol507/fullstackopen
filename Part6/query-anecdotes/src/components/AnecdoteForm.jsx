@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from 'react-query'
 import { createAnecdote } from '../requests'
 
+import { useNotificationDispatch } from '../NotificationContext'
+
 const AnecdoteForm = () => {
 
   const queryClient = useQueryClient()
+  const notificationDispatch = useNotificationDispatch()
 
   const newAnecdoteMutation = useMutation(createAnecdote,{
     onSuccess: (newAnecdote) => {
@@ -20,6 +23,9 @@ const AnecdoteForm = () => {
     if (content.length >= 5) {
       newAnecdoteMutation.mutate({ content, votes:0 })
       queryClient.invalidateQueries('anecdotes');
+      notificationDispatch({ type: 'SET_MESSAGE', message: 'Anecdote created successfully!' })
+    } else {
+      notificationDispatch({ type: 'SET_MESSAGE', message: 'Too short anecdote, must have length 5 or more' })
     }
     
   }
