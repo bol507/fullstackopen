@@ -8,7 +8,6 @@ const setToken = newToken => {
 }
 
 
-
 const getAll = async () => {
   try {
     const response = await api.get('/blogs')
