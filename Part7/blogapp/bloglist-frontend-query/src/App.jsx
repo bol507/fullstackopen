@@ -93,7 +93,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification info={info} />
+      <Notification/>
       <div>
         {user.name} logged in
         <button onClick={logout}>logout</button>

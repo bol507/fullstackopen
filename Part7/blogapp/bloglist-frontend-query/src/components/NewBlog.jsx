@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux'
+import { showNotification } from '../reducers/notificationReducer'
 
 const BlogForm = ({ createBlog }) => {
+  const dispatch = useDispatch()
+
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
@@ -8,6 +12,7 @@ const BlogForm = ({ createBlog }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     await createBlog({ title, author, url });
+    dispatch(showNotification('¡Anecdote created!', 5,'success'))
   };
 
   return (
