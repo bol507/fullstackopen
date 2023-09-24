@@ -9,9 +9,13 @@ import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
-import { useBlogs } from './contexts/blogContext';
+import { useNotificationDispatch } from './contexts/NotificationContext'
+
+import { useBlogs,BlogContext } from './contexts/blogContext';
 
 const App = () => {
+  const notificationDispatch = useNotificationDispatch()
+  const { updateBlog, deleteBlog} = useContext(BlogContext)
   const { blogs, isLoading } = useBlogs();
   const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
@@ -56,10 +60,12 @@ const App = () => {
   };
 
   const like = async (blog) => {
-    const blogToUpdate = { ...blog, likes: blog.likes + 1, user: blog.user.id };
-    const updatedBlog = await blogService.update(blogToUpdate);
-    notifyWith(`A like for the blog '${blog.title}' by '${blog.author}'`);
-    setBlogs(blogs.map((b) => (b.id === blog.id ? updatedBlog : b)));
+    try {
+      await updateBlog(blog); 
+      notificationDispatch({ type: 'SET_MESSAGE', message: `A like for the blog '${blog.title}' by '${blog.author}'` })
+    }  catch (error) {
+      notificationDispatch({ type: 'SET_MESSAGE', message: 'Error in likes' })
+    }
   };
 
   const remove = async (blog) => {
@@ -67,9 +73,15 @@ const App = () => {
       `Sure you want to remove '${blog.title}' by ${blog.author}`
     );
     if (ok) {
-      await blogService.remove(blog.id);
+     /* await blogService.remove(blog.id);
       notifyWith(`The blog' ${blog.title}' by '${blog.author} removed`);
-      setBlogs(blogs.filter((b) => b.id !== blog.id));
+      setBlogs(blogs.filter((b) => b.id !== blog.id));*/
+      try{
+        await deleteBlog(blog.id); 
+        notificationDispatch({ type: 'SET_MESSAGE', message: `The blog' ${blog.title}' by '${blog.author} removed` })
+      }catch(error){
+        notificationDispatch({ type: 'SET_MESSAGE', message: error})
+      }
     }
   };
 

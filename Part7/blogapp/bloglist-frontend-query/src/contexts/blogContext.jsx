@@ -9,13 +9,16 @@ const blogReducer = (state, action) => {
     case 'ADD_BLOG':
       return { ...state, blogs: [...state.blogs, action.blog] };
     case 'UPDATE_BLOG':
+      
       const updatedBlogs = state.blogs.map((blog) => {
+       
         if (blog.id === action.blog.id) {
-          return action.blog;
+          return { ...blog, likes: blog.likes + 1 };
         }
         return blog;
       });
       return { ...state, blogs: updatedBlogs };
+   
     default:
       return state;
   }
@@ -45,7 +48,13 @@ export const BlogContextProvider = (props) => {
   const updateBlogMutation = useMutation(api.updateBlog, {
     onSuccess: (data) => {
       blogDispatch({ type: 'UPDATE_BLOG', blog: data });
-     // blogQueryCache.invalidateQueries('blogs'); // Invalidate blogs query to trigger refetch
+      // blogQueryCache.invalidateQueries('blogs'); // Invalidate blogs query to trigger refetch
+    },
+  });
+
+  const deleteBlogMutation = useMutation(api.deleteBlog, {
+    onSuccess: (id) => {
+      blogDispatch({ type: 'SET_BLOG', blogs });
     },
   });
 
@@ -66,28 +75,30 @@ export const BlogContextProvider = (props) => {
       throw new Error('Failed to update blog');
     }
   }
-  
+
+  async function deleteBlog(blogId) {
+    try {
+      await deleteBlogMutation.mutateAsync(blogId);
+    } catch (error) {
+      throw new Error('Error delete blog');
+    }
+  }
+
   const contextValue = {
     blogState,
     blogDispatch,
     isLoading,
-    addBlog: addBlog,
-    updateBlog: updateBlog,
+    addBlog,
+    updateBlog,
+    deleteBlog,
   };
 
   return (
-    <BlogContext.Provider
-      value={contextValue}
-    >
+    <BlogContext.Provider value={contextValue}>
       {props.children}
     </BlogContext.Provider>
   );
 }; //BlogContextProvider
-
-export const useBlogDispatch = () => {
-  const { blogDispatch } = useContext(BlogContext);
-  return blogDispatch;
-};
 
 export const useBlogs = () => {
   const { blogState, isLoading } = useContext(BlogContext);
