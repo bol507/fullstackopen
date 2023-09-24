@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux'
-import { showNotification } from '../reducers/notificationReducer'
+import { useNotificationDispatch } from '../contexts/NotificationContext'
 
 const BlogForm = ({ createBlog }) => {
-  const dispatch = useDispatch()
+  const notificationDispatch = useNotificationDispatch()
 
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -12,7 +11,7 @@ const BlogForm = ({ createBlog }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     await createBlog({ title, author, url });
-    dispatch(showNotification('¡Anecdote created!', 5,'success'))
+    notificationDispatch({ type: 'SET_MESSAGE', message: 'Anecdote created successfully!' })
   };
 
   return (
