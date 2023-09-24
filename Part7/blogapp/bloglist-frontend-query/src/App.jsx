@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
@@ -9,8 +9,10 @@ import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
+import { useBlogs } from './contexts/blogContext';
+
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+  const { blogs, isLoading } = useBlogs();
   const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
 
@@ -19,10 +21,6 @@ const App = () => {
   useEffect(() => {
     const user = storageService.loadUser();
     setUser(user);
-  }, []);
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
   const notifyWith = (message, type = 'info') => {
@@ -53,10 +51,7 @@ const App = () => {
     notifyWith('logged out');
   };
 
-  const createBlog = async (newBlog) => {
-    const createdBlog = await blogService.create(newBlog);
-    notifyWith(`A new blog '${newBlog.title}' by '${newBlog.author}' added`);
-    setBlogs(blogs.concat(createdBlog));
+  const createBlog = () => {
     blogFormRef.current.toggleVisibility();
   };
 
@@ -93,7 +88,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification/>
+      <Notification />
       <div>
         {user.name} logged in
         <button onClick={logout}>logout</button>

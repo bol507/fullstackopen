@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNotificationDispatch } from '../contexts/NotificationContext'
+import {  BlogContext } from '../contexts/blogContext';
 
 const BlogForm = ({ createBlog }) => {
+  const {addBlog} = useContext(BlogContext)
   const notificationDispatch = useNotificationDispatch()
 
   const [title, setTitle] = useState('');
@@ -10,8 +12,13 @@ const BlogForm = ({ createBlog }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await createBlog({ title, author, url });
-    notificationDispatch({ type: 'SET_MESSAGE', message: 'Anecdote created successfully!' })
+    try {
+      await addBlog({ title, author, url }); 
+      notificationDispatch({ type: 'SET_MESSAGE', message: 'Blog created successfully!' })
+      createBlog() //call to toggle
+    } catch (error) {
+      notificationDispatch({ type: 'SET_MESSAGE', message: 'Error to create Blog!' })
+    }
   };
 
   return (
