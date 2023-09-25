@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import Blog from './components/Blog';
-import blogService from './services/blogs';
 import loginService from './services/login';
 import storageService from './services/storage';
 
@@ -10,22 +9,19 @@ import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
 import { useNotificationDispatch } from './contexts/NotificationContext'
-
 import { useBlogs,BlogContext } from './contexts/blogContext';
+import { useUser, UserContext } from './contexts/userContext';
 
 const App = () => {
   const notificationDispatch = useNotificationDispatch()
   const { updateBlog, deleteBlog} = useContext(BlogContext)
   const { blogs, isLoading } = useBlogs();
-  const [user, setUser] = useState('');
+  const { user } = useUser();
+  const { clearUser, loginUser } = useContext(UserContext)
+  //const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
 
   const blogFormRef = useRef();
-
-  useEffect(() => {
-    const user = storageService.loadUser();
-    setUser(user);
-  }, []);
 
   const notifyWith = (message, type = 'info') => {
     setInfo({
@@ -40,19 +36,20 @@ const App = () => {
 
   const login = async (username, password) => {
     try {
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      storageService.saveUser(user);
-      notifyWith('welcome!');
+      loginUser({ username, password });
+      //setUser(user);
+      //storageService.saveUser(user);
+      //notifyWith('welcome!');
     } catch (e) {
-      notifyWith('wrong username or password', 'error');
+      //notifyWith('wrong username or password', 'error');
     }
   };
 
   const logout = async () => {
-    setUser(null);
-    storageService.removeUser();
-    notifyWith('logged out');
+    clearUser()
+    //setUser(null);
+    //storageService.removeUser();
+    //notifyWith('logged out');
   };
 
   const createBlog = () => {
@@ -73,9 +70,6 @@ const App = () => {
       `Sure you want to remove '${blog.title}' by ${blog.author}`
     );
     if (ok) {
-     /* await blogService.remove(blog.id);
-      notifyWith(`The blog' ${blog.title}' by '${blog.author} removed`);
-      setBlogs(blogs.filter((b) => b.id !== blog.id));*/
       try{
         await deleteBlog(blog.id); 
         notificationDispatch({ type: 'SET_MESSAGE', message: `The blog' ${blog.title}' by '${blog.author} removed` })
@@ -85,7 +79,7 @@ const App = () => {
     }
   };
 
-  if (!user) {
+  if (!user || user.length === 0) {
     return (
       <div>
         <h2>log in to application</h2>
