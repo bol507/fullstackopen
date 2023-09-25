@@ -1,16 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import Blog from './components/Blog';
-import blogService from './services/blogs';
+import { useDispatch, useSelector } from 'react-redux'
+
 import loginService from './services/login';
 import storageService from './services/storage';
 
+import Blog from './components/Blog';
 import LoginForm from './components/Login';
 import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
+import { initializeBlogs } from './reducers/blogReducer';
+
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+
+  const dispatch = useDispatch()
+  const blogs = useSelector( (state) => state.blogs);
+
   const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
 
@@ -18,12 +24,14 @@ const App = () => {
 
   useEffect(() => {
     const user = storageService.loadUser();
-    setUser(user);
+    setUser(user);   
   }, []);
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+    dispatch(initializeBlogs()) 
+  }, [dispatch]) 
+
+
 
   const notifyWith = (message, type = 'info') => {
     setInfo({
@@ -53,12 +61,15 @@ const App = () => {
     notifyWith('logged out');
   };
 
-  const createBlog = async (newBlog) => {
+  /*const createBlog = async (newBlog) => {
     const createdBlog = await blogService.create(newBlog);
     notifyWith(`A new blog '${newBlog.title}' by '${newBlog.author}' added`);
     setBlogs(blogs.concat(createdBlog));
     blogFormRef.current.toggleVisibility();
-  };
+  };*/
+  const createBlog = ()=> {
+    blogFormRef.current.toggleVisibility();
+  }//createBlog
 
   const like = async (blog) => {
     const blogToUpdate = { ...blog, likes: blog.likes + 1, user: blog.user.id };
@@ -88,7 +99,7 @@ const App = () => {
     );
   }
 
-  const byLikes = (b1, b2) => b2.likes - b1.likes;
+  //const byLikes = (b1, b2) => b2.likes - b1.likes;
 
   return (
     <div>
@@ -102,7 +113,7 @@ const App = () => {
         <NewBlog createBlog={createBlog} />
       </Togglable>
       <div>
-        {blogs.sort(byLikes).map((blog) => (
+        {blogs.map((blog) => (
           <Blog
             key={blog.id}
             blog={blog}
