@@ -10,12 +10,19 @@ import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
 
-import { initializeBlogs } from './reducers/blogReducer';
+import { initializeBlogs, updateBlog, deleteBlog } from './reducers/blogReducer';
+import { showNotification } from './reducers/notificationReducer'
 
 const App = () => {
 
   const dispatch = useDispatch()
-  const blogs = useSelector( (state) => state.blogs);
+  const blogs = useSelector( (state) => {
+    const array = state.blogs;
+    const sorted = [...array].sort((a, b) => {
+      return b.likes - a.likes
+    });
+    return sorted;
+  });
 
   const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
@@ -61,31 +68,22 @@ const App = () => {
     notifyWith('logged out');
   };
 
-  /*const createBlog = async (newBlog) => {
-    const createdBlog = await blogService.create(newBlog);
-    notifyWith(`A new blog '${newBlog.title}' by '${newBlog.author}' added`);
-    setBlogs(blogs.concat(createdBlog));
-    blogFormRef.current.toggleVisibility();
-  };*/
   const createBlog = ()=> {
     blogFormRef.current.toggleVisibility();
   }//createBlog
 
-  const like = async (blog) => {
-    const blogToUpdate = { ...blog, likes: blog.likes + 1, user: blog.user.id };
-    const updatedBlog = await blogService.update(blogToUpdate);
-    notifyWith(`A like for the blog '${blog.title}' by '${blog.author}'`);
-    setBlogs(blogs.map((b) => (b.id === blog.id ? updatedBlog : b)));
-  };
+  const like = (blog) => {
+    dispatch(updateBlog(blog))
+    dispatch(showNotification(`A like for the blog '${blog.title}' by '${blog.author}'`, 5,'success'))
+  }//like
 
   const remove = async (blog) => {
     const ok = window.confirm(
       `Sure you want to remove '${blog.title}' by ${blog.author}`
     );
     if (ok) {
-      await blogService.remove(blog.id);
-      notifyWith(`The blog' ${blog.title}' by '${blog.author} removed`);
-      setBlogs(blogs.filter((b) => b.id !== blog.id));
+      dispatch(deleteBlog(blog.id))
+      dispatch(showNotification(`The blog' ${blog.title}' by '${blog.author} removed`,5,'success'))
     }
   };
 
@@ -98,8 +96,6 @@ const App = () => {
       </div>
     );
   }
-
-  //const byLikes = (b1, b2) => b2.likes - b1.likes;
 
   return (
     <div>

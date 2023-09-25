@@ -18,7 +18,8 @@ const create = async (object) => {
   return request.data;
 };
 
-const update = async (object) => {
+const update = async (blog) => {
+  const object = { ...blog, likes: blog.likes + 1 };
   const request = await axios.put(`${baseUrl}/${object.id}`, object, {
     headers,
   });
