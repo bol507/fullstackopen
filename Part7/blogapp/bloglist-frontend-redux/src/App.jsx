@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 
 import Blog from './components/Blog';
@@ -6,6 +6,7 @@ import LoginForm from './components/Login';
 import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
+import Users from './components/Users'
 
 import { initializeBlogs, updateBlog, deleteBlog } from './reducers/blogReducer';
 import { showNotification } from './reducers/notificationReducer'
@@ -21,11 +22,8 @@ const App = () => {
     });
     return sorted;
   });
+  const userBlog = useSelector((state) => state.blogs.user)
   const user = useSelector(state => state.user)
-
-  //const [user, setUser] = useState('');
-  const [info, setInfo] = useState({ message: null });
-
   const blogFormRef = useRef();
   
   useEffect(() => { 
@@ -67,13 +65,13 @@ const App = () => {
       dispatch(deleteBlog(blog.id))
       dispatch(showNotification(`The blog' ${blog.title}' by '${blog.author} removed`,5,'success'))
     }
-  };
+  };//remove
 
   if (!user || user.length === 0) {
     return (
       <div>
         <h2>log in to application</h2>
-        <Notification info={info} />
+        
         <LoginForm login={login} />
       </div>
     );
@@ -82,7 +80,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification/>
+  
       <div>
         {user.name} logged in
         <button onClick={logout}>logout</button>
@@ -101,6 +99,7 @@ const App = () => {
           />
         ))}
       </div>
+      <Users blogs={blogs}/>
     </div>
   );
 };

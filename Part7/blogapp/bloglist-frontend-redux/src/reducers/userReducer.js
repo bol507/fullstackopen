@@ -21,7 +21,7 @@ export const initializeUser = () => {
         const user = await userService.getUser()
         dispatch(setUser(user))
     }//return
-}//initializeBlogs
+}//initializeUser
 
 export const loginUser = content => {
     return async (dispatch) => {
