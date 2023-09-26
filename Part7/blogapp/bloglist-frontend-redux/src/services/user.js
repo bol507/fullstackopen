@@ -1,6 +1,6 @@
 let token = null;
 
-const STORAGE_KEY = 'loggedBlogAppUser';
+const STORAGE_KEY = 'BlogAppUserRedux';
 
 const setUser = (user) => {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
@@ -19,7 +19,8 @@ const getUser = () => {
 };
 
 const clearUser = () => {
-  localStorage.clear();
+  console.log('llmaron a clearuser')
+  localStorage.removeItem(STORAGE_KEY)
   token = null;
 };
 

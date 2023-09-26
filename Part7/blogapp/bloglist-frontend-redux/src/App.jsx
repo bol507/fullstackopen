@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 
-import loginService from './services/login';
-import storageService from './services/storage';
-
 import Blog from './components/Blog';
 import LoginForm from './components/Login';
 import NewBlog from './components/NewBlog';
@@ -12,6 +9,7 @@ import Togglable from './components/Togglable';
 
 import { initializeBlogs, updateBlog, deleteBlog } from './reducers/blogReducer';
 import { showNotification } from './reducers/notificationReducer'
+import { initializeUser, loginUser, removeUser } from './reducers/userReducer'
 
 const App = () => {
 
@@ -23,49 +21,33 @@ const App = () => {
     });
     return sorted;
   });
+  const user = useSelector(state => state.user)
 
-  const [user, setUser] = useState('');
+  //const [user, setUser] = useState('');
   const [info, setInfo] = useState({ message: null });
 
   const blogFormRef = useRef();
-
-  useEffect(() => {
-    const user = storageService.loadUser();
-    setUser(user);   
+  
+  useEffect(() => { 
+    dispatch(initializeUser())  
   }, []);
 
   useEffect(() => {
     dispatch(initializeBlogs()) 
   }, [dispatch]) 
 
-
-
-  const notifyWith = (message, type = 'info') => {
-    setInfo({
-      message,
-      type,
-    });
-
-    setTimeout(() => {
-      setInfo({ message: null });
-    }, 3000);
-  };
-
   const login = async (username, password) => {
     try {
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      storageService.saveUser(user);
-      notifyWith('welcome!');
-    } catch (e) {
-      notifyWith('wrong username or password', 'error');
+      dispatch(loginUser({ username, password }))
+      dispatch(showNotification('Welcome!', 5,'success'))
+    } catch (error) {
+      dispatch(showNotification(error, 5,'error'))
     }
   };
 
   const logout = async () => {
-    setUser(null);
-    storageService.removeUser();
-    notifyWith('logged out');
+    dispatch(removeUser())
+    dispatch(showNotification('Logged out', 5,'success'))
   };
 
   const createBlog = ()=> {
@@ -87,7 +69,7 @@ const App = () => {
     }
   };
 
-  if (!user) {
+  if (!user || user.length === 0) {
     return (
       <div>
         <h2>log in to application</h2>
