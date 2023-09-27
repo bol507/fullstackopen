@@ -2,8 +2,9 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { Route, Routes, Link, useMatch } from 'react-router-dom'
 
-import Blog from './components/Blog';
+import Blogs from './components/Blogs';
 import LoginForm from './components/Login';
+import SingleBlog from './components/SingleBlog';
 import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
@@ -86,6 +87,23 @@ const App = () => {
   const match = useMatch('/users/:id')
   const userId = match?.params?.id;
   const userById = userId ? users.find(user => user.id === userId) : null;
+
+  const matchB = useMatch('/blogs/:id')
+  const blogId = matchB?.params?.id;
+  const blogById = blogId ? blogs.find(blog => blog.id === blogId) : null;
+
+  const Menu = () => {
+    const padding = {
+      paddingRight: 5
+    }
+    return (
+      <div>
+        <Link style={padding} to="/">Blogs</Link>
+        <Link style={padding} to="/users">Users</Link>
+        
+      </div>
+    )
+  }
   
 
   if (!user || user.length === 0) {
@@ -100,19 +118,18 @@ const App = () => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <Menu/>
   
       <div>
         {user.name} logged in
         <button onClick={logout}>logout</button>
       </div>
      
-      
-
-     
       <Routes>
         <Route path="/users/:id" element={<SingleUser user={userById} blogs={blogs}/>} />
         <Route path="/users" element={<Users users={users} userBlogCounts={userBlogCounts} />} />
+        <Route path="/" element={<Blogs user={user} blogs={blogs}/>} />
+        <Route path="/blogs/:id" element={<SingleBlog blog={blogById} like={like}/>} />
       </Routes>
      
     </div>
