@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom'
 
-const Blog = ({ blog, like, canRemove, remove }) => {
-  const [visible, setVisible] = useState(false);
-
+const Blog = ({ blog, }) => {
 
   return (
     <div  className="blog">
@@ -14,6 +11,5 @@ const Blog = ({ blog, like, canRemove, remove }) => {
     </div>
   );
 };
-
 
 export default Blog;

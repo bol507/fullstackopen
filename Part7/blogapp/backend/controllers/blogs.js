@@ -1,15 +1,18 @@
 const router = require('express').Router()
 const Blog = require('../models/blog')
-
+const Comment = require('../models/comment')
 const { userExtractor } = require('../utils/middleware')
 
 router.get('/', async (request, response) => {
   const blogs = await Blog
     .find({})
     .populate('user', { username: 1, name: 1 })
+    .populate({
+      path: 'comments',
+      select: 'content'})
 
-  response.json(blogs)
-})
+  response.json(blogs);
+});
 
 router.post('/', userExtractor, async (request, response) => {
   const { title, author, url, likes } = request.body
@@ -61,6 +64,28 @@ router.delete('/:id', userExtractor, async (request, response) => {
   await blog.remove()
   
   response.status(204).end()
+})
+
+router.post('/:id/comments', async (request, response) => {
+
+  const { id } = request.params;
+  const { content } = request.body;
+
+  if (!id || !content) {
+      return response.status(400).json({ error: "Missing blog id or comment body" });
+  }
+
+  const comment = new Comment({ content, blog: id });
+  await comment.save();
+
+  await Blog.findByIdAndUpdate(id, { $push: { comments: comment } });
+  response.status(201).json(comment);
+});
+
+router.get("/:id/comments", async (request, response) => {
+  const { id } = request.params;
+  const comments = await Comment.find({ blog: id });
+  response.status(200).json(comments);
 })
 
 module.exports = router

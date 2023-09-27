@@ -12,7 +12,7 @@ import Togglable from './components/Togglable';
 import SingleUser from './components/SingleUser'
 import Users from './components/Users'
 
-import { initializeBlogs, updateBlog, deleteBlog } from './reducers/blogReducer';
+import { initializeBlogs, updateBlog, deleteBlog, addComment } from './reducers/blogReducer';
 import { showNotification } from './reducers/notificationReducer'
 import { initializeUser, loginUser, removeUser } from './reducers/userReducer'
 import { initializeUsers } from './reducers/usersReducer'
@@ -27,11 +27,10 @@ const App = () => {
     });
     return sorted;
   });
-  const userBlog = useSelector((state) => state.blogs.user)
   const user = useSelector(state => state.user) //use for login
   const users = useSelector(state => state.users)
   const blogFormRef = useRef();
-  
+ 
   useEffect(() => { 
     dispatch(initializeUser())  
   }, []);
@@ -77,6 +76,10 @@ const App = () => {
     }
   };//remove
 
+  const comment = (blogid, comment) => {
+    dispatch(addComment(blogid,comment))
+    dispatch(showNotification(`A comments is registered`, 5,'success'))
+  }
 
   const userBlogCounts = blogs.reduce((counts, blog) => {
     const username = blog.user.username;
@@ -93,17 +96,15 @@ const App = () => {
   const blogById = blogId ? blogs.find(blog => blog.id === blogId) : null;
 
   const Menu = () => {
-    const padding = {
-      paddingRight: 5
-    }
+    const padding = 'px-5'; // Clase de Tailwind CSS para el relleno horizontal
+  
     return (
-      <div>
-        <Link style={padding} to="/">Blogs</Link>
-        <Link style={padding} to="/users">Users</Link>
-        
+      <div className="flex justify-center bg-gray-200 py-4">
+        <Link className={`text-gray-700 ${padding}`} to="/">Blogs</Link>
+        <Link className={`text-gray-700 ${padding}`} to="/users">Users</Link>
       </div>
-    )
-  }
+    );
+  };
   
 
   if (!user || user.length === 0) {
@@ -117,22 +118,26 @@ const App = () => {
   }
 
   return (
-    <div>
-      <Menu/>
-  
-      <div>
-        {user.name} logged in
-        <button onClick={logout}>logout</button>
-      </div>
-     
-      <Routes>
-        <Route path="/users/:id" element={<SingleUser user={userById} blogs={blogs}/>} />
-        <Route path="/users" element={<Users users={users} userBlogCounts={userBlogCounts} />} />
-        <Route path="/" element={<Blogs user={user} blogs={blogs}/>} />
-        <Route path="/blogs/:id" element={<SingleBlog blog={blogById} like={like}/>} />
-      </Routes>
-     
-    </div>
+    <div className="flex flex-col items-center">
+  <Menu />
+
+  <div className="flex items-center text-gray-700 my-4">
+    {user.name} logged in
+    <button
+      onClick={logout}
+      className="ml-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 focus:outline-none focus:shadow-outline"
+    >
+      Logout
+    </button>
+  </div>
+
+  <Routes>
+    <Route path="/users/:id" element={<SingleUser user={userById} blogs={blogs} />} />
+    <Route path="/users" element={<Users users={users} userBlogCounts={userBlogCounts} />} />
+    <Route path="/" element={<Blogs user={user} blogs={blogs} />} />
+    <Route path="/blogs/:id" element={<SingleBlog blog={blogById} like={like} comment={comment} />} />
+  </Routes>
+</div>
   );
 };
 
