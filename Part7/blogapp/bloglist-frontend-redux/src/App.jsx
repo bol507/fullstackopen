@@ -1,16 +1,20 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
+import { Route, Routes, Link, useMatch } from 'react-router-dom'
 
 import Blog from './components/Blog';
 import LoginForm from './components/Login';
 import NewBlog from './components/NewBlog';
 import Notification from './components/Notification';
 import Togglable from './components/Togglable';
+
+import SingleUser from './components/SingleUser'
 import Users from './components/Users'
 
 import { initializeBlogs, updateBlog, deleteBlog } from './reducers/blogReducer';
 import { showNotification } from './reducers/notificationReducer'
 import { initializeUser, loginUser, removeUser } from './reducers/userReducer'
+import { initializeUsers } from './reducers/usersReducer'
 
 const App = () => {
 
@@ -23,7 +27,8 @@ const App = () => {
     return sorted;
   });
   const userBlog = useSelector((state) => state.blogs.user)
-  const user = useSelector(state => state.user)
+  const user = useSelector(state => state.user) //use for login
+  const users = useSelector(state => state.users)
   const blogFormRef = useRef();
   
   useEffect(() => { 
@@ -33,6 +38,10 @@ const App = () => {
   useEffect(() => {
     dispatch(initializeBlogs()) 
   }, [dispatch]) 
+
+  useEffect(() => { 
+    dispatch(initializeUsers())  
+  }, []);
 
   const login = async (username, password) => {
     try {
@@ -67,6 +76,18 @@ const App = () => {
     }
   };//remove
 
+
+  const userBlogCounts = blogs.reduce((counts, blog) => {
+    const username = blog.user.username;
+    counts[username] = (counts[username] || 0) + 1;
+    return counts;
+  }, {});
+
+  const match = useMatch('/users/:id')
+  const userId = match?.params?.id;
+  const userById = userId ? users.find(user => user.id === userId) : null;
+  
+
   if (!user || user.length === 0) {
     return (
       <div>
@@ -85,21 +106,15 @@ const App = () => {
         {user.name} logged in
         <button onClick={logout}>logout</button>
       </div>
-      <Togglable buttonLabel="new note" ref={blogFormRef}>
-        <NewBlog createBlog={createBlog} />
-      </Togglable>
-      <div>
-        {blogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            like={() => like(blog)}
-            canRemove={user && blog.user.username === user.username}
-            remove={() => remove(blog)}
-          />
-        ))}
-      </div>
-      <Users blogs={blogs}/>
+     
+      
+
+     
+      <Routes>
+        <Route path="/users/:id" element={<SingleUser user={userById} blogs={blogs}/>} />
+        <Route path="/users" element={<Users users={users} userBlogCounts={userBlogCounts} />} />
+      </Routes>
+     
     </div>
   );
 };

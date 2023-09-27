@@ -1,41 +1,24 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux'
-import { initializeUsers } from '../reducers/usersReducer'
-const Users = ({blogs}) => {
-    const dispatch = useDispatch()
-    const users = useSelector(state => state.users)
-    useEffect(() => { 
-        dispatch(initializeUsers())  
-        
-      }, []);
 
-    const blogsPerUser = {};
+import React from 'react';
+import { Link } from 'react-router-dom'
 
-    blogs.forEach((blog) => {
-      const username = blog.user.username;
-      if (blogsPerUser[username]) {
-        blogsPerUser[username]++;
-      } else {
-        blogsPerUser[username] = 1;
-      }
-    });
 
+const Users = ({ users, userBlogCounts }) => {
+  return (
+    <div>
+       <h2>Users</h2>
+      <h3>Blogs created</h3>
+      {users.map((user) => (
+      <div key={user.id}>
+        <Link to={`/users/${user.id}`}>
+          <span>{user.name}</span>
+        </Link>
+        <span>{userBlogCounts[user.username] || 0}</span>
+      </div>
+    ))}
+    </div>
     
+  )
+};
 
-    return (
-        <div>
-          <h2>Users</h2>
-          <h3>blogs created</h3>
-          {users.map((user) => (
-            <div>
-              <span>{user.name} </span> 
-              <span> {blogsPerUser[user.username] || 0}</span>
-              
-            </div>
-          ))}
-
-        </div>        
-    )//return
-}//Users
-
-export default Users
+export default Users;
