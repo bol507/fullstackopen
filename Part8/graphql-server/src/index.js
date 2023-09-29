@@ -107,7 +107,7 @@ const typeDefs = `
     type Book {
         title: String!
         published: Int!
-        author: Author!
+        author: String!
         id: ID!
         genres: [String!]!
     }
@@ -116,6 +116,7 @@ const typeDefs = `
         dummy: Int
         bookCount: Int!
         authorCount: Int!
+        allBooks: [Book!]!
     }
 `
 
@@ -124,7 +125,9 @@ const resolvers = {
         dummy: () => 0,
         bookCount: () => books.length,
         authorCount: () => authors.length,
-    }
+        allBooks: () => books,   
+    },
+   
 }
 
 const server = new ApolloServer({
