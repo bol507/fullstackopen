@@ -1,5 +1,7 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
+const { GraphQLError } = require('graphql')
 
 let authors = [
     {
@@ -120,6 +122,17 @@ const typeDefs = `
         allBooks(author: String, genre: String):[Book!]!
         allAuthors: [Author!]!
     }
+
+    type Mutation {
+        addBook(
+          title: String!
+          author: String!
+          published: Int!
+          genres: [String!]!
+        ): Book!
+
+        editAuthor(name: String!, setBornTo: Int!): Author
+      }
 `
 
 const resolvers = {
@@ -147,6 +160,26 @@ const resolvers = {
             );
         }, 
     },
+    Mutation: {
+        addBook: (root, arg) => {
+          const newBook = {...arg, id: uuid()}
+          books.push(newBook)
+          return newBook
+        },
+        editAuthor: (root, args) => {
+            const author = authors.find(author => author.name === args.name)
+            if (!author) {
+              throw new GraphQLError(`Author not found: ${args.name}`,{
+                extensions: {
+                  code: 'BAD_USER_INPUT',
+                  invalidArgs: args.name
+                }
+              })
+            }
+            author.born = args.setBornTo
+            return author
+          },
+      },
    
 }
 
