@@ -21,7 +21,7 @@ const Authors = (props) => {
   if (result.loading)  {
     return <div>loading...</div>
   }
-  console.log(result.data.allAuthors)
+  
   const authors = result.data.allAuthors
 
   return (
