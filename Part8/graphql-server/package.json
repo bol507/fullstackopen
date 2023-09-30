@@ -8,6 +8,10 @@
     "graphql": "^16.8.1"
   },
   "scripts": {
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
