@@ -132,6 +132,8 @@ const typeDefs = `
         ): Book!
 
         editAuthor(name: String!, setBornTo: Int!): Author
+
+        addAuthor(name: String!, born: Int): Author!
       }
 `
 
@@ -179,9 +181,22 @@ const resolvers = {
             author.born = args.setBornTo
             return author
           },
-      },
-   
-}
+          addAuthor: (root, args) => {
+            const existingAuthor = authors.find((author) => author.name === args.name);
+            if (existingAuthor) {
+              throw new GraphQLError(`Author already exists: ${args.name}`, {
+                extensions: {
+                  code: 'BAD_USER_INPUT',
+                  invalidArgs: args.name,
+                },
+              });
+            }
+            const newAuthor = { name: args.name, born: args.born, id: uuid() };
+            authors.push(newAuthor);
+            return newAuthor;
+          },
+      },//mutation
+}//resolver
 
 const server = new ApolloServer({
     typeDefs,
