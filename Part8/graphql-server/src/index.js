@@ -4,11 +4,13 @@ const { v1: uuid } = require('uuid');
 const { GraphQLError } = require('graphql');
 
 const mongoose = require('mongoose');
+
 const config = require('./utils/config');
 const Author = require('./models/author');
 const Book = require('./models/book');
+const User = require('./models/user');
 
-const { ObjectId } = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 mongoose.set('strictQuery', false);
 
@@ -37,6 +39,16 @@ const typeDefs = `
         genres: [String!]!
         id: ID!
     }
+
+    type User {
+        username: String!
+        favoriteGenre: String!
+        id: ID!
+      }
+      
+      type Token {
+        value: String!
+      }
     
     type Query {
         dummy: Int
@@ -44,6 +56,7 @@ const typeDefs = `
         authorCount: Int!
         allBooks(author: String, genre: String):[Book!]!
         allAuthors: [Author!]!
+        me: User
     }
 
     type Mutation {
@@ -55,8 +68,15 @@ const typeDefs = `
         ): Book!
 
         editAuthor(id: ID!, setBornTo: Int!): Author
-
         addAuthor(name: String!, born: Int): Author!
+        createUser(
+            username: String!
+            favoriteGenre: String!
+          ): User
+          login(
+            username: String!
+            password: String!
+          ): Token
       }
 `;
 
@@ -70,9 +90,18 @@ const resolvers = {
 		allAuthors: async () => {
 			return await Author.find({});
 		},
+		me: (root, args, context) => {
+			if (!context.user) {
+				throw new GraphQLError('Authentication required');
+			}
+			return context.user;
+		},
 	},
 	Mutation: {
 		addBook: async (root, args) => {
+            if (!context.token) {
+                throw new Error('Authentication required');
+            }
 			const author = await Author.findOne({ name: args.author }).exec();
 
 			if (!author) {
@@ -91,14 +120,18 @@ const resolvers = {
 				throw new GraphQLError(error.message, {
 					extensions: {
 						code: 'BAD_USER_INPUT',
-						invalidArgs: args, error
-					}
+						invalidArgs: args,
+						error,
+					},
 				});
 			}
 
 			return newBook;
 		},
 		editAuthor: async (root, args) => {
+            if (!context.token) {
+                throw new Error('Authentication required');
+              }
 			const author = Author.findById(args.id);
 			if (!author) {
 				throw new GraphQLError(`Author not found: ${args.name}`, {
@@ -109,17 +142,18 @@ const resolvers = {
 				});
 			}
 			author.born = args.setBornTo;
-            try{
-                await author.save();
-            }catch(error){
-                throw new GraphQLError(error.message, {
-                    extensions: {
+			try {
+				await author.save();
+			} catch (error) {
+				throw new GraphQLError(error.message, {
+					extensions: {
 						code: 'BAD_USER_INPUT',
-						invalidArgs:  args, error
-					}
-                  })
-            }
-			
+						invalidArgs: args,
+						error,
+					},
+				});
+			}
+
 			return author;
 		},
 		addAuthor: async (root, args) => {
@@ -140,12 +174,49 @@ const resolvers = {
 				throw new GraphQLError(error.message, {
 					extensions: {
 						code: 'BAD_USER_INPUT',
-						invalidArgs: args.name, args, error
-					}
+						invalidArgs: args.name,
+						args,
+						error,
+					},
 				});
 			}
 
 			return newAuthor;
+		}, //addAuthor
+		createUser: async (root, args) => {
+			const user = new User({
+				username: args.username,
+				favoriteGenre: args.favouriteGenre,
+			});
+			try {
+				await user.save();
+			} catch (error) {
+				throw new GraphQLError('Creating the user failed', {
+					extensions: {
+						code: 'BAD_USER_INPUT',
+						invalidArgs: username,
+						favouriteGenre,
+						error,
+					},
+				});
+			}
+			return user;
+		}, //createUser
+		login: async (root, args) => {
+			const user = new User.findOne({ username: args.username }).exec();
+			if (!user || args.password !== 'secret') {
+				throw new GraphQLError('wrong credentials', {
+					extensions: {
+						code: 'BAD_USER_INPUT',
+					},
+				});
+			}
+            const userForToken = {
+                username: user.username,
+                id: user._id,
+            }
+            const token = jwt.sign(userForToken, process.env.JWT_SECRET, { expiresIn: '1h' });
+            return { value: token };
 		},
 	}, //mutation
 }; //resolver
