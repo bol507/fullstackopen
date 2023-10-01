@@ -15,6 +15,7 @@ query {
     name
     born
     bookCount
+    id
   }
 }
 `
@@ -47,3 +48,14 @@ export const CREATE_AUTHOR = gql`
     }
   }
 `;
+
+export const SET_AUTHOR_BORN = gql`
+  mutation editAuthor($id: ID!, $setBornTo: Int!) {
+    editAuthor(id: $id, setBornTo: $setBornTo) {
+      name
+      id
+      born
+      bookCount
+    }
+  }
+`

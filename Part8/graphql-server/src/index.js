@@ -131,7 +131,7 @@ const typeDefs = `
           genres: [String!]!
         ): Book!
 
-        editAuthor(name: String!, setBornTo: Int!): Author
+        editAuthor(id: ID!, setBornTo: Int!): Author
 
         addAuthor(name: String!, born: Int): Author!
       }
@@ -169,7 +169,7 @@ const resolvers = {
           return newBook
         },
         editAuthor: (root, args) => {
-            const author = authors.find(author => author.name === args.name)
+            const author = authors.find(author => author.id === args.id)
             if (!author) {
               throw new GraphQLError(`Author not found: ${args.name}`,{
                 extensions: {
