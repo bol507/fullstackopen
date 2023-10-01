@@ -63,9 +63,9 @@ const typeDefs = `
 const resolvers = {
 	Query: {
 		bookCount: async () => await Book.collection.countDocuments(),
-		authorCount: async() =>  await Author.collection.countDocuments(),
-		allBooks: async() => {
-			return await Book.find({}).populate("author");
+		authorCount: async () => await Author.collection.countDocuments(),
+		allBooks: async () => {
+			return await Book.find({}).populate('author');
 		},
 		allAuthors: async () => {
 			return await Author.find({});
@@ -73,21 +73,30 @@ const resolvers = {
 	},
 	Mutation: {
 		addBook: async (root, args) => {
-            const author = await Author.findOne({ name:args.author}).exec();
-        
-            if (!author) {
-                throw new Error(`Author not found: ${args.author}`);
-            }
-            
-			const newBook = new Book({ 
-                title: args.title,
-                author: author.id,
-                published: args.published,
-                genres: args.genres,
-            });
-            
-            await newBook.save();
-			return newBook
+			const author = await Author.findOne({ name: args.author }).exec();
+
+			if (!author) {
+				throw new Error(`Author not found: ${args.author}`);
+			}
+
+			const newBook = new Book({
+				title: args.title,
+				author: author.id,
+				published: args.published,
+				genres: args.genres,
+			});
+			try {
+				await newBook.save();
+			} catch (error) {
+				throw new GraphQLError(error.message, {
+					extensions: {
+						code: 'BAD_USER_INPUT',
+						invalidArgs: args, error
+					}
+				});
+			}
+
+			return newBook;
 		},
 		editAuthor: async (root, args) => {
 			const author = Author.findById(args.id);
@@ -100,12 +109,22 @@ const resolvers = {
 				});
 			}
 			author.born = args.setBornTo;
-			await author.save();
+            try{
+                await author.save();
+            }catch(error){
+                throw new GraphQLError(error.message, {
+                    extensions: {
+						code: 'BAD_USER_INPUT',
+						invalidArgs:  args, error
+					}
+                  })
+            }
+			
 			return author;
 		},
-		addAuthor: async(root, args) => {
-			const existingAuthor =  await Author.findOne({ name: args.name }).exec();
-            
+		addAuthor: async (root, args) => {
+			const existingAuthor = await Author.findOne({ name: args.name }).exec();
+
 			if (existingAuthor) {
 				throw new GraphQLError(`Author already exists: ${args.name}`, {
 					extensions: {
@@ -115,7 +134,17 @@ const resolvers = {
 				});
 			}
 			const newAuthor = new Author({ name: args.name, born: args.born });
-			await newAuthor.save();
+			try {
+				await newAuthor.save();
+			} catch (error) {
+				throw new GraphQLError(error.message, {
+					extensions: {
+						code: 'BAD_USER_INPUT',
+						invalidArgs: args.name, args, error
+					}
+				});
+			}
+
 			return newAuthor;
 		},
 	}, //mutation
