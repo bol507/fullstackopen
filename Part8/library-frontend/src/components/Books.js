@@ -1,14 +1,16 @@
-import React from 'react'
+
 
 const Books = ({show,booksgql}) => { 
+  
   if (!show) {
     return null
   }
   if (booksgql.loading)  {
     return <div>loading...</div>
   }
+  
   const books = booksgql.data.allBooks
-
+  console.log(books)
   return (
     <div>
       <h2>books</h2>
@@ -23,7 +25,7 @@ const Books = ({show,booksgql}) => {
           {books.map((a) => (
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author}</td>
+              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           ))}

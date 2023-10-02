@@ -125,7 +125,6 @@ const resolvers = {
 					},
 				});
 			}
-
 			return newBook;
 		},
 		editAuthor: async (root, args) => {
@@ -186,7 +185,7 @@ const resolvers = {
 		createUser: async (root, args) => {
 			const user = new User({
 				username: args.username,
-				favoriteGenre: args.favouriteGenre,
+				favoriteGenre: args.favoriteGenre,
 			});
 			try {
 				await user.save();
@@ -203,7 +202,8 @@ const resolvers = {
 			return user;
 		}, //createUser
 		login: async (root, args) => {
-			const user = new User.findOne({ username: args.username }).exec();
+			const user = await User.findOne({ username: args.username }).exec();
+	
 			if (!user || args.password !== 'secret') {
 				throw new GraphQLError('wrong credentials', {
 					extensions: {
@@ -213,9 +213,11 @@ const resolvers = {
 			}
             const userForToken = {
                 username: user.username,
-                id: user._id,
+                id: user.id,
             }
-            const token = jwt.sign(userForToken, process.env.JWT_SECRET, { expiresIn: '1h' });
+			
+            const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+			console.log(token)
             return { value: token };
 		},
 	}, //mutation
