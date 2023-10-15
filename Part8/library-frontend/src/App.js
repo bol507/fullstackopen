@@ -6,8 +6,9 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
+import Recommend from './components/Recommend'
 
-import { ALL_AUTHORS,ALL_BOOKS,CREATE_BOOK,CREATE_AUTHOR,SET_AUTHOR_BORN } from './queries';
+import { ALL_AUTHORS,ALL_BOOKS,CREATE_BOOK,CREATE_AUTHOR,SET_AUTHOR_BORN, GET_USER } from './queries';
 
 const Notify = ({errorMessage}) => {
   if ( !errorMessage ) {
@@ -22,8 +23,13 @@ const Notify = ({errorMessage}) => {
 
 const App = () => {
   const [page, setPage] = useState('authors')
+  /**
+   * querys
+   */
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+  const user = useQuery(GET_USER)
+
   const [createBook] = useMutation(CREATE_BOOK,{ refetchQueries: [ { query: ALL_BOOKS } ]})
   const [createAuthor] = useMutation(CREATE_AUTHOR,{ refetchQueries: [{ query: ALL_AUTHORS}] })
   const [setAuthorBorn] = useMutation(SET_AUTHOR_BORN,{ refetchQueries: [{ query: ALL_AUTHORS}] });
@@ -63,6 +69,7 @@ const App = () => {
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
+        <button onClick={() => setPage('recommends')}>recommends</button>
         <button onClick={() => setPage('add')}>add book</button>
         <button onClick={logout}>logout</button>
       </div>
@@ -72,6 +79,8 @@ const App = () => {
       <Books show={page === 'books'} booksgql={books} />
 
       <NewBook show={page === 'add'} authorsgql={authors} createBook={createBook} createAuthor={createAuthor} />
+
+      <Recommend show={page === 'recommends'} booksgql={books} user={user.data.me}/>
     </div>
   )
 }

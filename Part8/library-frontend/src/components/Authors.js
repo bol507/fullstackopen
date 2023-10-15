@@ -11,13 +11,23 @@ const Authors = ({ show, authorsgql, setAuthorBorn }) => {
 		return <div>loading...</div>;
 	}
 	const authors = authorsgql.data.allAuthors;
+
+	const handleChange = (event) => {
+		console.log(event.target.value)
+		setAuthorId(event.target.value)
+	  }
   
-  const submit = async (event) => {
-    event.preventDefault()
-    await setAuthorBorn({ variables: { id: authorId, setBornTo: parseInt(bornYear) } });
-    setAuthorId('');
-    setBornYear('');
-  }
+	const submit = async (event) => {
+		event.preventDefault()
+		if (authorId) {
+			console.log('authorid', authorId);
+			await setAuthorBorn({ variables: { id: authorId, setBornTo: parseInt(bornYear) } });
+			setAuthorId('');
+			setBornYear('');
+		} else {
+			console.log('Debes seleccionar un autor antes de enviar el formulario.');
+		}
+	}
 
 	return (
 		<div>
@@ -41,7 +51,8 @@ const Authors = ({ show, authorsgql, setAuthorBorn }) => {
 			<h2>Set Birthyear</h2>
 			<form onSubmit={submit}>
 				<label>Autor:</label>
-				<select value={authorId} onChange={(e) => setAuthorId(e.target.value)}>
+				<select value={authorId} onChange={handleChange}>
+					<option value="">select author</option>
 					{authors.map((author) => (
 						<option key={author.id} value={author.id}>
 							{author.name}

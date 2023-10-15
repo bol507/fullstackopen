@@ -77,6 +77,7 @@ const typeDefs = `
             username: String!
             password: String!
           ): Token
+		
       }
 `;
 
@@ -91,17 +92,17 @@ const resolvers = {
 			return await Author.find({});
 		},
 		me: (root, args, context) => {
-			if (!context.user) {
-				throw new GraphQLError('Authentication required');
-			}
-			return context.user;
+			return context.currentUser
 		},
 	},
 	Mutation: {
-		addBook: async (root, args) => {
-            if (!context.token) {
-                throw new Error('Authentication required');
+		addBook: async (root, args, context) => {
+            const currentUser = context.currentUser
+
+            if (!currentUser) {
+                throw new AuthenticationError("not authenticated")
             }
+
 			const author = await Author.findOne({ name: args.author }).exec();
 
 			if (!author) {
@@ -127,11 +128,15 @@ const resolvers = {
 			}
 			return newBook;
 		},
-		editAuthor: async (root, args) => {
-            if (!context.token) {
-                throw new Error('Authentication required');
-              }
-			const author = Author.findById(args.id);
+		editAuthor: async (root, args, context) => {
+			const currentUser = context.currentUser
+			
+            if (!currentUser) {
+                throw new AuthenticationError("not authenticated")
+            }
+			
+			const author = await Author.findById(args.id);
+			
 			if (!author) {
 				throw new GraphQLError(`Author not found: ${args.name}`, {
 					extensions: {
@@ -140,9 +145,10 @@ const resolvers = {
 					},
 				});
 			}
+	
 			author.born = args.setBornTo;
 			try {
-				await author.save();
+				return await author.save();
 			} catch (error) {
 				throw new GraphQLError(error.message, {
 					extensions: {
@@ -153,7 +159,7 @@ const resolvers = {
 				});
 			}
 
-			return author;
+			
 		},
 		addAuthor: async (root, args) => {
 			const existingAuthor = await Author.findOne({ name: args.name }).exec();
@@ -203,7 +209,7 @@ const resolvers = {
 		}, //createUser
 		login: async (root, args) => {
 			const user = await User.findOne({ username: args.username }).exec();
-			console.log(user)
+			
 			if (!user || args.password !== 'secret') {
 				throw new GraphQLError('wrong credentials', {
 					extensions: {
@@ -217,7 +223,7 @@ const resolvers = {
             }
 			
             const token = jwt.sign(userForToken, process.env.JWT_SECRET);
-			console.log(token)
+			
             return { value: token };
 		},
 	}, //mutation
@@ -230,6 +236,17 @@ const server = new ApolloServer({
 
 startStandaloneServer(server, {
 	listen: { port: 4000 },
+	context: async ({ req, res }) => {
+		const auth = req ? req.headers.authorization : null
+		if (auth && auth.toLowerCase().startsWith('bearer ')) {
+		 	const decodedToken = jwt.verify(
+				auth.substring(7), process.env.JWT_SECRET
+		  	)
+		  	const currentUser = await User.findOne({ username: decodedToken.username })
+			
+        	return { currentUser }
+		}
+	  },
 }).then(({ url }) => {
 	console.log(`Server ready at ${url}`);
 });
