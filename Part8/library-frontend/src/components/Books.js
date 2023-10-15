@@ -1,6 +1,7 @@
+import React, { useState } from 'react';
 
-
-const Books = ({show,booksgql}) => { 
+const Books = ({show,booksgql}) => {
+  const [selectedGenre, setSelectedGenre] = useState('');
   
   if (!show) {
     return null
@@ -10,10 +11,32 @@ const Books = ({show,booksgql}) => {
   }
   
   const books = booksgql.data.allBooks
-  console.log(books)
+ 
+  const genres = [...new Set(books.flatMap(book => book.genres))];
+
+  const filteredBooks = selectedGenre
+    ? books.filter(book => book.genres.includes(selectedGenre))
+    : books;
+    
+  const handleGenreChange = event => {
+    setSelectedGenre(event.target.value);
+  };  
+  
   return (
     <div>
       <h2>books</h2>
+
+      <div>
+        <label htmlFor="genre-select">Filter by Genre: </label>
+        <select id="genre-select" value={selectedGenre} onChange={handleGenreChange}>
+          <option value="">All Genres</option>
+          {genres.map(genre => (
+            <option key={genre} value={genre}>
+              {genre}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <table>
         <tbody>
@@ -22,11 +45,11 @@ const Books = ({show,booksgql}) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
+          {filteredBooks.map(book => (
+            <tr key={book.title}>
+              <td>{book.title}</td>
+              <td>{book.author.name}</td>
+              <td>{book.published}</td>
             </tr>
           ))}
         </tbody>

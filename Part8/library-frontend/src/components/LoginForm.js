@@ -22,8 +22,12 @@ const LoginForm = ({setError, setToken }) => {
 
   const submit = async (event) => {
     event.preventDefault()
+    try{
+      await login({ variables: { username, password } })
+    }catch(error){
+      setError('connection error, check connection to db')
+    }
 
-    login({ variables: { username, password } })
   }
 
   return (

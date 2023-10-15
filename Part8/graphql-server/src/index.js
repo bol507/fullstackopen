@@ -203,7 +203,7 @@ const resolvers = {
 		}, //createUser
 		login: async (root, args) => {
 			const user = await User.findOne({ username: args.username }).exec();
-	
+			console.log(user)
 			if (!user || args.password !== 'secret') {
 				throw new GraphQLError('wrong credentials', {
 					extensions: {

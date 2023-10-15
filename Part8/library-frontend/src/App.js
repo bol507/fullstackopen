@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery,useMutation } from '@apollo/client';
+import { useQuery,useMutation,useApolloClient } from '@apollo/client';
 
 
 import Authors from './components/Authors'
@@ -29,17 +29,19 @@ const App = () => {
   const [setAuthorBorn] = useMutation(SET_AUTHOR_BORN,{ refetchQueries: [{ query: ALL_AUTHORS}] });
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)  
-   
+  const client = useApolloClient()
+  
   const notify = (message) => {
     setErrorMessage(message)
     setTimeout(() => {
       setErrorMessage(null)
     }, 10000)
   }
+
   const logout = () => {
     setToken(null)
     localStorage.clear()
-    //client.resetStore()
+    client.resetStore()
   }
 
   if (!token) {
