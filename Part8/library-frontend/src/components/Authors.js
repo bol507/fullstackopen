@@ -13,14 +13,12 @@ const Authors = ({ show, authorsgql, setAuthorBorn }) => {
 	const authors = authorsgql.data.allAuthors;
 
 	const handleChange = (event) => {
-		console.log(event.target.value)
 		setAuthorId(event.target.value)
 	  }
   
 	const submit = async (event) => {
 		event.preventDefault()
 		if (authorId) {
-			console.log('authorid', authorId);
 			await setAuthorBorn({ variables: { id: authorId, setBornTo: parseInt(bornYear) } });
 			setAuthorId('');
 			setBornYear('');

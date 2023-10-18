@@ -40,33 +40,38 @@ const resolvers = {
                 throw new AuthenticationError("not authenticated")
             }
 
-			const author = await Author.findOne({ name: args.author }).exec();
+			const authorExists = await Author.findOne({ name: args.author }).exec();
 
-			if (!author) {
-				throw new Error(`Author not found: ${args.author}`);
+			if (!authorExists) {
+				const newAuthor = new Author({ "name": args.author })
+                try {
+                    await newAuthor.save()
+                } catch (error) {
+                    throw new UserInputError(error.message, {
+                        invalidArgs: args,
+                    })
+                }
+
 			}
-
-			const newBook = new Book({
-				title: args.title,
-				author: author.id,
-				published: args.published,
-				genres: args.genres,
-			});
+			const author = await Author.findOne({ name: args.author }).exec();
+			
+            const newBook = new Book({ ...args, author: author });
 			try {
-				await newBook.save();
+				const addedBook = await newBook.save();
+				//subscription
+				pubsub.publish("BOOK_ADDED", { bookAdded: addedBook })
+
+				return addedBook;
+
 			} catch (error) {
 				throw new GraphQLError(error.message, {
 					extensions: {
 						code: 'BAD_USER_INPUT',
-						invalidArgs: args,
-						error,
+						invalidArgs: args
 					},
 				});
 			}
-			//subscription
-			pubsub.publish("BOOK_ADDED", { bookAdded: addedBook })
-
-			return newBook;
+			
 		},
 		editAuthor: async (root, args, context) => {
 			const currentUser = context.currentUser

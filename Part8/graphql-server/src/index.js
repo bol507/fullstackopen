@@ -1,21 +1,22 @@
 const { ApolloServer } = require('@apollo/server');
 const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer')
-const { expressMiddleware } = require('@apollo/server/express4')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
+const { expressMiddleware } = require('@apollo/server/express4')
 
-const http = require('http')
 const express = require('express')
+const http = require('http')
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
 
 const mongoose = require('mongoose');
 
-const { WebSocketServer } = require('ws')
-const { useServer } = require('graphql-ws/lib/use/ws')
-
 const config = require('./utils/config');
 const typeDefs = require('./schema');
-const resolvers = require('./resolvers')
+const resolvers = require('./resolvers');
+const User = require('./models/User');
+
+const { WebSocketServer } = require('ws')
+const { useServer } = require('graphql-ws/lib/use/ws')
 
 mongoose.set('strictQuery', false);
 
@@ -42,7 +43,7 @@ const start = async() => {
     const schema = makeExecutableSchema({ typeDefs, resolvers })
     const serverCleanup = useServer({ schema }, wsServer)
 
-	const server = new ApolloServer({
+    const server = new ApolloServer({
         schema,
         plugins: [
             ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -57,19 +58,16 @@ const start = async() => {
             },
         ],
     })
-
-	await server.start()
+    
+    await server.start()
 
     app.use('/', cors(), express.json(), expressMiddleware(server, {
         context: async ({ req }) => {
             const auth = req ? req.headers.authorization : null
-            if (auth && auth.toLowerCase().startsWith('bearer ')) {
-                const decodedToken = jwt.verify(
-					auth.substring(7), process.env.JWT_SECRET
-				  )
-				  const currentUser = await User.findOne({ username: decodedToken.username })
-				
-				return { currentUser }
+            if (auth && auth.startsWith('Bearer ')) {
+                const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET) || null;
+                const currentUser = await User.findById(decodedToken.id);
+                return { currentUser }
             }
         },
     }))
