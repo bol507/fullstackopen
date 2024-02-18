@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery,useMutation,useApolloClient,useSubscription } from '@apollo/client';
+import { useQuery, useMutation, useApolloClient, useSubscription } from '@apollo/client';
 
 
 import Authors from './components/Authors'
@@ -20,6 +20,24 @@ const Notify = ({errorMessage}) => {
     </div>
   )
 }
+
+// problem n+1
+export const updateCache = (cache, query, addedBook) => {
+  // helper that is used to eliminate saving same person twice
+  const uniqByName = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.name
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByName(allBooks.concat(addedBook)),
+    }
+  })
+}//updateCache
 
 const App = () => {
   const [page, setPage] = useState('authors')
@@ -49,7 +67,7 @@ const App = () => {
     localStorage.clear()
     client.resetStore()
   }
-
+/*
   const includedIn = (set, object) =>
     set.map(p => p.title).includes(object.title)
 
@@ -63,13 +81,14 @@ const App = () => {
         data: dataInStore
       })
     }
-  }
+  }*/
 
   useSubscription(BOOK_ADDED, {
-    onSubscriptionData: ({ subscriptionData }) => {
-      const addedBook = subscriptionData.data.bookAdded
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
       window.alert(`${addedBook.title} added`)
-      updateCacheWith(addedBook)
+      //updateCacheWith(addedBook)
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook)
     }
   })
 

@@ -107,6 +107,7 @@ query($genre: String) {
   }
 }
 `
+
 export const BOOK_ADDED = gql`
   subscription {
     bookAdded {

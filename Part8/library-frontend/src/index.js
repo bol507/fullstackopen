@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import { ApolloClient, ApolloProvider, HttpLink ,InMemoryCache, split } from '@apollo/client'
+
+import { ApolloClient, ApolloProvider, InMemoryCache,  createHttpLink, split } from '@apollo/client'
 
 import { setContext } from '@apollo/client/link/context'
 
@@ -19,19 +20,18 @@ const authLink = setContext((_, { headers }) => {
     }
   })
 
-  const httpLink = new HttpLink({ uri: 'http://localhost:4000' })
+  const httpLink = createHttpLink({ uri: 'http://localhost:4000', })
 
   const wsLink = new GraphQLWsLink(
-    createClient({
-      url: 'ws://localhost:4000',
-    })
+    createClient({ url: 'ws://localhost:4000' })
   )
+  
 
   const splitLink = split(
     ({query}) => {
       const definition = getMainDefinition(query)
       return (
-        definition.kind === '0perationDefinition' && 
+        definition.kind === 'OperationDefinition' && 
         definition.operation === 'subscription'
       );
     }, 

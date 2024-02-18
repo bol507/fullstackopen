@@ -12,8 +12,9 @@ const resolvers = {
 	Query: {
 		bookCount: async () => await Book.collection.countDocuments(),
 		authorCount: async () => await Author.collection.countDocuments(),
-		allBooks: async (root,args) => {
-			return await Book.find({}).populate('author');
+		allBooks: async (root, args,) => {
+			const books = await Book.find({}).populate("author");
+            return books
 		},
 		allAuthors: async () => {
 			return await Author.find({});
@@ -31,6 +32,18 @@ const resolvers = {
             const res = await Book.find({ genres: { $regex: new RegExp(genre, "i") } }).populate("author");
             return res;
         },
+	},
+	Author: {
+        bookCount: async (parent) => {
+            const books = await Book.find({ author: parent._id });
+            return books.length;
+        },
+    },
+	Book: {
+		author: async (parent) => {
+			const author = await Author.findById(parent.author);
+			return author;
+		  }
 	},
 	Mutation: {
 		addBook: async (root, args, context) => {
@@ -54,7 +67,7 @@ const resolvers = {
 
 			}
 			const author = await Author.findOne({ name: args.author }).exec();
-			
+			console.log(author);
             const newBook = new Book({ ...args, author: author });
 			try {
 				const addedBook = await newBook.save();

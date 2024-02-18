@@ -28,8 +28,8 @@ const typeDefs = `
         dummy: Int
         bookCount: Int!
         authorCount: Int!
-        allBooks(author: String, genre: String):[Book!]!
-		allBooksByGenre(author: String, genre: String) : [Book!]!,
+        allBooks:[Book!]!
+		    allBooksByGenre(author: String, genre: String) : [Book!]!,
         allAuthors: [Author!]!
         me: User
     }
